@@ -1,0 +1,49 @@
+version: '3.3'
+
+services:
+  nginx:
+    build: 
+      dockerfile: Dockerfiles/Dockerfile.nginx
+      context: .
+    container_name: nginx
+    ports:
+      - 80:80
+      - 90:90
+      - 443:443
+    volumes:
+      - ./ssl-crt/henceze.online.pem:/etc/ssl/henceze.online.pem
+      - ./ssl-crt/henceze.online.key:/etc/ssl/henceze.online.key
+      - ./music/Milana.mp3:/var/www/default/music/Milanochka.mp3
+      - ./nginx/cfg/default:/etc/nginx/sites-enabled/default
+      - ./nginx/cfg/default:/etc/nginx/sites-available/default
+      - ./nginx/html_php/default.html:/var/www/default/index.html
+      - ./nginx/cfg/2def:/etc/nginx/sites-enabled/2def
+      - ./nginx/cfg/2def:/etc/nginx/sites-available/2def
+      - ./nginx/html_php/index.html:/var/www/2def/index.html
+    networks:
+        host:
+           ipv4_address: 172.16.238.2
+
+  apache_php:
+    container_name: php_apache
+    build:
+      dockerfile: Dockerfiles/Dockerfile.apache
+      context: .
+    ports:
+      - 8080:8080
+    volumes:
+      - ./apache/index.php:/var/www/html/index.php
+      - ./apache/ports.conf:/etc/apache2/ports.conf
+      - ./apache/000-default.conf:/etc/apache2/sites-enabled/000-default.conf
+      - ./apache/000-default.conf:/etc/apache2/sites-available/000-default.conf
+      - ./apache/hosts:/etc/hosts
+    networks:
+        host:
+           ipv4_address: 172.16.238.3
+networks:
+  host:
+    driver: bridge
+    ipam:
+     driver: default
+     config:
+       - subnet: 172.16.238.0/24
